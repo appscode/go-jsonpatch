@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/cameront/go-jsonpatch.svg?branch=master)](https://travis-ci.org/cameront/go-jsonpatch)
+[![Build Status](https://travis-ci.org/appscode/go-jsonpatch.svg?branch=master)](https://travis-ci.org/appscode/go-jsonpatch)
+[![Go Report Card](https://goreportcard.com/badge/appscode/go-jsonpatch "Go Report Card")](https://goreportcard.com/report/appscode/go-jsonpatch)
+[![GoDoc](https://godoc.org/github.com/appscode/go-jsonpatch?status.svg "GoDoc")](https://godoc.org/github.com/appscode/go-jsonpatch)
 
 go-jsonpatch
 ============

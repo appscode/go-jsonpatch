@@ -1,13 +1,14 @@
 package jsonpatch
 
 import (
-	//"encoding/json"
+	//
 	//"github.com/bitly/go-simplejson"
 	"fmt"
-	ptr "github.com/xeipuuv/gojsonpointer"
 	"reflect"
 	"strconv"
 	"strings"
+
+	ptr "github.com/xeipuuv/gojsonpointer"
 )
 
 // Operation is a...
@@ -15,19 +16,19 @@ type OperationType string
 
 // All available operations.
 const (
-	Remove  OperationType = "remove"
-	Add     OperationType = "add"
-	Replace OperationType = "replace"
-	Move    OperationType = "move"
-	Test    OperationType = "test"
-	Copy    OperationType = "copy"
+	Remove  string = "remove"
+	Add     string = "add"
+	Replace string = "replace"
+	Move    string = "move"
+	Test    string = "test"
+	Copy    string = "copy"
 )
 
 type PatchOperation struct {
-	From  string        `json:"from,omitempty"`
-	Op    OperationType `json:"op"`
-	Path  string        `json:"path"`
-	Value interface{}   `json:"value,omitempty"`
+	From  string      `json:"from,omitempty"`
+	Op    string      `json:"op"`
+	Path  string      `json:"path"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 func lastObj(path string) (ptr.JsonPointer, string, error) {

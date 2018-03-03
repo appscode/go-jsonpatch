@@ -1,23 +1,23 @@
 package jsonpatch_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/cameront/go-jsonpatch"
+	"github.com/appscode/go-jsonpatch"
+	"github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func Example() {
 	patch := jsonpatch.Patch{
-		Operations: []jsonpatch.PatchOperation{
-			{Op: jsonpatch.Add, Path: "/foo", Value: "bar"},
-			{Op: jsonpatch.Add, Path: "/baz", Value: []interface{}{1, 2, 3}},
-			{Op: jsonpatch.Remove, Path: "/baz/1"},
-			{Op: jsonpatch.Test, Path: "/baz", Value: []interface{}{1, 3}},
-			{Op: jsonpatch.Replace, Path: "/baz/0", Value: 42},
-			{Op: jsonpatch.Remove, Path: "/baz/1"},
-		},
+		{Op: jsonpatch.Add, Path: "/foo", Value: "bar"},
+		{Op: jsonpatch.Add, Path: "/baz", Value: []interface{}{1, 2, 3}},
+		{Op: jsonpatch.Remove, Path: "/baz/1"},
+		{Op: jsonpatch.Test, Path: "/baz", Value: []interface{}{1, 3}},
+		{Op: jsonpatch.Replace, Path: "/baz/0", Value: 42},
+		{Op: jsonpatch.Remove, Path: "/baz/1"},
 	}
 
 	// apply the patch to an empty document

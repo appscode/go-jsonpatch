@@ -1,7 +1,6 @@
 package jsonpatch
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
@@ -42,7 +41,7 @@ func TestApplyOpFromString(t *testing.T) {
 
 	patch, err := FromString(`[{"op": "add", "path": "/baz", "value": "qux"}]`)
 	assert.Nil(t, err)
-	patch.Operations[0].Apply(&doc)
+	patch[0].Apply(&doc)
 	val, found := doc["baz"]
 	assert.True(t, found)
 	assert.Equal(t, "qux", val.(string))
@@ -292,7 +291,7 @@ func TestUnrecognizedElement(t *testing.T) {
 	doc := getMapDoc(`{"foo": "bar", "baz": "qux"}`)
 	patch, err := FromString(`[{"op": "replace", "path": "/baz", "value": "boo", "something": "baz"}]`)
 	assert.Nil(t, err)
-	err = patch.Operations[0].Apply(&doc)
+	err = patch[0].Apply(&doc)
 	assert.Nil(t, err)
 	assert.Equal(t, "boo", doc["baz"].(string))
 }

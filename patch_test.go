@@ -1,7 +1,6 @@
 package jsonpatch
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -29,7 +28,7 @@ func TestMakePatch_nop(t *testing.T) {
 		docB := getMapDoc(test.src)
 		patch, err := MakePatch(docA, docB)
 		assert.Nil(t, err, index)
-		assert.Equal(t, len(patch.Operations), 0, index)
+		assert.Equal(t, len(patch), 0, index)
 	}
 }
 
@@ -76,19 +75,19 @@ func TestPatchMarshalAndUnmarshal(t *testing.T) {
 	}{
 		{ // empty
 			`[]`,
-			Patch{Operations: []PatchOperation{}},
+			Patch{},
 		},
 		{ // value is ommitted
 			`[{"from":"/foo","op":"move","path":"/foo2"}]`,
-			Patch{Operations: []PatchOperation{PatchOperation{Op: Move, From: "/foo", Path: "/foo2"}}},
+			Patch{{Op: Move, From: "/foo", Path: "/foo2"}},
 		},
 		{ // from is ommitted
 			`[{"op":"replace","path":"/foo","value":"foo"}]`,
-			Patch{Operations: []PatchOperation{PatchOperation{Op: Replace, Path: "/foo", Value: "foo"}}},
+			Patch{{Op: Replace, Path: "/foo", Value: "foo"}},
 		},
 		{ // value and from are ommitted
 			`[{"op":"remove","path":"/foo"}]`,
-			Patch{Operations: []PatchOperation{PatchOperation{Op: Remove, Path: "/foo"}}},
+			Patch{{Op: Remove, Path: "/foo"}},
 		},
 	} {
 		index := fmt.Sprintf("test %d", i)

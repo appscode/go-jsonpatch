@@ -4,34 +4,27 @@ Ported from github.com/stefankoegl/python-json-patch
 package jsonpatch
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/json-iterator/go"
 )
 
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+type ByPath []PatchOperation
+
+func (a ByPath) Len() int           { return len(a) }
+func (a ByPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByPath) Less(i, j int) bool { return a[i].Path < a[j].Path }
+
 // Patch is a list of PatchOperations.
-type Patch struct {
-	Operations []PatchOperation
-}
-
-func (p Patch) MarshalJSON() ([]byte, error) {
-	return json.Marshal(p.Operations)
-}
-
-func (p *Patch) UnmarshalJSON(b []byte) error {
-	ops := []PatchOperation{}
-	err := json.Unmarshal(b, &ops)
-	if err != nil {
-		return err
-	}
-	*p = Patch{ops}
-	return nil
-}
+type Patch []PatchOperation
 
 func (p *Patch) Apply(doc interface{}) (err error) {
-	for _, op := range p.Operations {
+	for _, op := range *p {
 		err = op.Apply(doc)
 		if err != nil {
 			return err
@@ -40,10 +33,37 @@ func (p *Patch) Apply(doc interface{}) (err error) {
 	return nil
 }
 
+func (p Patch) String() string {
+	data, _ := json.Marshal(p)
+	return string(data)
+}
+
 func FromString(str string) (Patch, error) {
 	patch := Patch{}
 	err := json.Unmarshal([]byte(str), &patch)
 	return patch, err
+}
+
+var errBadJSONDoc = fmt.Errorf("invalid JSON Document")
+
+// CreatePatch creates a patch as specified in http://jsonpatch.com/
+//
+// 'a' is original, 'b' is the modified document. Both are to be given as json encoded content.
+// The function will return an array of JsonPatchOperations
+//
+// An error will be returned if any of the two documents are invalid.
+func CreatePatch(src, dst []byte) (Patch, error) {
+	mapSrc := map[string]interface{}{}
+	mapDst := map[string]interface{}{}
+	err := json.Unmarshal(src, &mapSrc)
+	if err != nil {
+		return Patch{}, errBadJSONDoc
+	}
+	err = json.Unmarshal(dst, &mapDst)
+	if err != nil {
+		return Patch{}, errBadJSONDoc
+	}
+	return MakeDiff(mapSrc, mapDst)
 }
 
 // MakePatch generates a patch by comparing two documents.
@@ -61,9 +81,9 @@ func MakeDiff(src, dst interface{}) (Patch, error) {
 		return Patch{}, fmt.Errorf("not a valid map: %T", dst)
 	}
 
-	patch := Patch{[]PatchOperation{}}
+	patch := Patch([]PatchOperation{})
 	for _, opPtr := range compareDicts("", mapSrc, mapDst) {
-		patch.Operations = append(patch.Operations, *opPtr)
+		patch = append(patch, *opPtr)
 	}
 	return patch, nil
 }
@@ -92,7 +112,7 @@ func compareValues(path string, value, other interface{}) []*PatchOperation {
 
 func compareDicts(path string, src, dst map[string]interface{}) []*PatchOperation {
 	operations := []*PatchOperation{}
-	for key, _ := range src {
+	for key := range src {
 		currentPath := path + "/" + key
 		if _, ok := dst[key]; !ok {
 			remove := &PatchOperation{Op: "remove", Path: currentPath}
@@ -103,7 +123,7 @@ func compareDicts(path string, src, dst map[string]interface{}) []*PatchOperatio
 			operations = append(operations, operation)
 		}
 	}
-	for key, _ := range dst {
+	for key := range dst {
 		currentPath := path + "/" + key
 		if _, ok := src[key]; !ok {
 			add := &PatchOperation{Op: "add", Path: currentPath, Value: dst[key]}
